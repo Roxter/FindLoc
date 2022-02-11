@@ -1,8 +1,10 @@
 <component name="ArtifactManager">
-  <artifact type="jar" name="project_FindLoc:jar">
+  <artifact name="project_FindLoc:jar">
     <output-path>$PROJECT_DIR$/out/artifacts/project_FindLoc_jar</output-path>
-    <root id="archive" name="project_FindLoc.jar">
-      <element id="module-output" name="project_FindLoc" />
+    <root id="root">
+      <element id="archive" name="project_FindLoc.jar">
+        <element id="module-output" name="project_FindLoc" />
+      </element>
     </root>
   </artifact>
 </component>
