@@ -19,24 +19,31 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.*;
+import java.text.NumberFormat;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MainView extends VBox {
 
-    final static int axisMax = 400;
-    final static int maxspeed = 50;
-    final static int indent = 40;
-    final static int maxRangePoints = 20;
+    private int axisMax = 400;
+    private int maxspeed = 50;
+    private int indent = 40;
+    private int initRangePoints = 20;
+    private int initSpeed = 20;
 
     private int front_canvas_side = axisMax * 2;
     private int back_canvas_side = front_canvas_side +indent*2;
 
     private AtomicBoolean is_started_ReadDraw;
     private AtomicBoolean is_draw_points_on_circles;
+    private long start_time;
+    private long end_time;
 
     private Label welcome_message;
+    private Label elapsed_time;
     private TextField sourcefile_field;
     private TextField range_field;
+    private TextField speed_field;
     private TextArea out_field1;
     private TextArea out_field2;
     private File selected_file;
@@ -66,6 +73,9 @@ public class MainView extends VBox {
         String javaVersion = System.getProperty("java.version");
         String javafxVersion = System.getProperty("javafx.version");
         //welcome_message = new Label("Hello, JavaFX " + javafxVersion + ", running on Java " + javaVersion + ".");
+
+        // Инициализация подсчёта времени выполнения
+        elapsed_time = new Label();
 
         // Инициализация canvas области
         frontcanvas = new Canvas(front_canvas_side, front_canvas_side);
@@ -103,7 +113,8 @@ public class MainView extends VBox {
         });
 
         // Инициализация поля ввода радиуса кластера
-        range_field = new TextField(String.valueOf(maxRangePoints));
+        range_field = new TextField(String.valueOf(initRangePoints));
+        speed_field = new TextField(String.valueOf(initSpeed));
         
         // Инициализация кнопки запуска процесса
         start_button = new Button("Read and Draw");
@@ -121,10 +132,31 @@ public class MainView extends VBox {
                         params.mainParamsList().clear();
                         read_and_draw.start(selected_file);
                     } else {
-                        if (range_field.getText().matches("[1-9][0-9]*")) {
+                        if (range_field.getText().matches("[1-9][0-9]*") && speed_field.getText().matches("[1-9][0-9]*")) {
                             is_started_ReadDraw.set(false);
                             start_button.setText("Read and Draw");
-                            solve_and_draw.start(selected_file, Integer.parseInt(range_field.getText()));
+
+                            start_time = System.currentTimeMillis();
+
+                            solve_and_draw.run(selected_file, Integer.parseInt(range_field.getText()), Integer.parseInt(speed_field.getText()));
+//                            diff_draw_button.fire();
+
+                            end_time = System.currentTimeMillis() - start_time;
+                            if (end_time < 60000)
+                                elapsed_time.setText(" elapsed time: " + ((double)end_time / 1000.0) + " secs");
+                            else {
+                                double elapsed = end_time / 1000.0 / 60.0;
+                                NumberFormat nf_out = NumberFormat.getNumberInstance(Locale.US);
+                                nf_out.setMaximumFractionDigits(3);
+                                elapsed_time.setText("elapsed time: " + nf_out.format(elapsed) + " minutes");
+                            }
+
+                            drawAxis();
+
+                            for (int i = 0; i < params.mainParamsList().size(); i++) {
+                                drawPoint(params.mainParamsList().get(i)[5], params.mainParamsList().get(i)[6]);
+                            }
+
                         } else
                             range_field.setText("Enter a valid value!");
                     }
@@ -139,20 +171,22 @@ public class MainView extends VBox {
         diff_draw_button.setOnAction(e -> {
             if (!params.mainParamsList().isEmpty() && !params.refOutParamsList().isEmpty()) {
                 drawClear();
-                if (is_draw_points_on_circles.get()) {      // точки все - круги - точки полученные
+                if (is_draw_points_on_circles.get()) {      // Снизу вверх: точки все - круги - оси - точки полученные
                     for (int i = 0; i < params.mainParamsList().size(); i++) {
                         drawPoint(params.mainParamsList().get(i)[5], params.mainParamsList().get(i)[6]);
                     }
                     for (int i = 0; i < params.refOutParamsList().size(); i++) {
-                        drawCircle(params.refOutParamsList().get(i)[0], params.refOutParamsList().get(i)[1]);
+                        drawCircle(params.refOutParamsList().get(i)[5], params.refOutParamsList().get(i)[6], 5);
                     }
+                    drawAxis();
                     for (int i = 0; i < params.refOutParamsList().size(); i++) {
-                        drawPoint(params.refOutParamsList().get(i)[0], params.refOutParamsList().get(i)[1]);
+                        drawPoint(params.refOutParamsList().get(i)[5], params.refOutParamsList().get(i)[6]);
                     }
-                } else {                                   // круги - точки все
+                } else {                                   // Снизу вверх: круги - оси - точки все - оси
                     for (int i = 0; i < params.refOutParamsList().size(); i++) {
-                        drawCircle(params.refOutParamsList().get(i)[0], params.refOutParamsList().get(i)[1]);
+                        drawCircle(params.refOutParamsList().get(i)[5], params.refOutParamsList().get(i)[6], 5);
                     }
+                    drawAxis();
                     for (int i = 0; i < params.mainParamsList().size(); i++) {
                         drawPoint(params.mainParamsList().get(i)[5], params.mainParamsList().get(i)[6]);
                     }
@@ -168,7 +202,7 @@ public class MainView extends VBox {
         // Компоновка панелей
         canvas_pane = new Pane(backcanvas, frontcanvas_group);
         sourcefile_box = new HBox(sourcefile_field, sourcefile_button);
-        start_box = new HBox(range_field, start_button, diff_draw_button);
+        start_box = new HBox(range_field, speed_field, start_button, diff_draw_button, elapsed_time);
         out_field_box = new HBox(out_field1, out_field2);
         this.getChildren().addAll(canvas_pane, sourcefile_box, start_box, out_field_box);
 
@@ -180,6 +214,7 @@ public class MainView extends VBox {
         start_button.setAlignment(Pos.BASELINE_RIGHT);
         start_box.setAlignment(Pos.CENTER);
         range_field.setStyle("-fx-pref-width: 40");
+        speed_field.setStyle("-fx-pref-width: 40");
         out_field1.setStyle("-fx-pref-height: 100");
         out_field1.setEditable(false);
         out_field2.setStyle("-fx-pref-height: 100");
@@ -195,7 +230,20 @@ public class MainView extends VBox {
 
     private int transY(int y) {        return front_canvas_side - y - front_canvas_side / 2;    }
 
-    private void drawAxis() {
+    private void draw(Shape... shape) {
+        Pane pane = new Pane(backcanvas, frontcanvas_group);
+        pane.setPrefSize(front_canvas_side +indent*2, front_canvas_side +indent*2);
+        Rectangle outputClip = new Rectangle();
+        pane.setClip(outputClip);
+        pane.layoutBoundsProperty().addListener((ov, oldValue, newValue) -> {
+            outputClip.setWidth(newValue.getWidth());
+            outputClip.setHeight(newValue.getHeight());
+        });
+        this.getChildren().set(0, pane);
+        for(Shape s: shape)     frontcanvas_group.getChildren().add(s);
+    }
+
+    public void drawAxis() {
         Color color = Color.LIGHTGREEN;
         Line axis_lineX = new Line(transX(-axisMax), transY(0), transX(axisMax), transY(0));      // Координаты Y в axisLineX отображаются в canvasside - n
         Line axis_lineY = new Line(transX(0), transY(-axisMax), transX(0), transY(axisMax));      // Координаты X в axisLineY отображаются в canvasside - n
@@ -232,19 +280,6 @@ public class MainView extends VBox {
         }
     }
 
-    private void draw(Shape... shape) {
-        Pane pane = new Pane(backcanvas, frontcanvas_group);
-        pane.setPrefSize(front_canvas_side +indent*2, front_canvas_side +indent*2);
-        Rectangle outputClip = new Rectangle();
-        pane.setClip(outputClip);
-        pane.layoutBoundsProperty().addListener((ov, oldValue, newValue) -> {
-            outputClip.setWidth(newValue.getWidth());
-            outputClip.setHeight(newValue.getHeight());
-        });
-        this.getChildren().set(0, pane);
-        for(Shape s: shape)     frontcanvas_group.getChildren().add(s);
-    }
-
     public void drawPoint(Integer x, Integer y) {
         Rectangle point = new Rectangle();
         point.setX(transX(x));
@@ -254,22 +289,27 @@ public class MainView extends VBox {
         draw(point);
     }
 
-    public void drawCircle(Integer x, Integer y) {
-        Circle circle = new Circle(maxRangePoints);
+    public void drawCircle(Integer x, Integer y, Integer num_ex) {
+        if (range_field.getText().matches("[1-9][0-9]*") && speed_field.getText().matches("[1-9][0-9]*")) {
+            Circle circle = new Circle(Integer.parseInt(range_field.getText()));
 
-        circle.setCenterX(transX(x));
-        circle.setCenterY(transY(y));
-        circle.setFill(Color.YELLOW);
+            circle.setCenterX(transX(x));
+            circle.setCenterY(transY(y));
+            circle.setFill(Color.rgb((num_ex*20+20) % 255, (num_ex*20+50) % 255, (num_ex*20+133) % 255));
+//            circle.setFill(Color.rgb((int)(Math.random() * 255), (int)(Math.random() * 255), (int)(Math.random() * 255)));
 //        circle.setStrokeWidth(1);
 //        circle.setStroke(Color.BLACK);
 
-        draw(circle);
+            draw(circle);
+        } else
+            range_field.setText("Enter a valid value!");
     }
 
     public void drawClear() {
         frontcanvas_group.getChildren().clear();
         frontcanvas_group.getChildren().add(frontcanvas);
         drawAxis();
+        elapsed_time.setText("");
     }
 
     public void toTextOut1(String str) { out_field1.appendText(str); }

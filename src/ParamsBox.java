@@ -1,11 +1,13 @@
+import com.sun.org.apache.xpath.internal.operations.Bool;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class ParamsBox {
 
     private List<Integer[]> mainParamsList;
-    private List<Integer[]> outParamsList;
     private List<Integer[]> refOutParamsList;       // список опорных параметров
+    private List<Integer[]> outParamsList;
 
     ParamsBox() {
         mainParamsList = new ArrayList<>();
