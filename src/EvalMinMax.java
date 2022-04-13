@@ -24,7 +24,7 @@ public class EvalMinMax {
 
     boolean Changed() {
         return
-                (x_max > 0 && y_max > 0 && x_min < Integer.MAX_VALUE && y_min < Integer.MAX_VALUE && x_max > x_min && y_max > y_min);
+                (x_max > 0 && y_max > 0 && x_min < Integer.MAX_VALUE && y_min < Integer.MAX_VALUE && (x_max > x_min || y_max > y_min));
     }
 
     Integer GetXMin() {
