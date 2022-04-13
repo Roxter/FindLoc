@@ -5,9 +5,9 @@ import java.util.List;
 
 public class ParamsBox {
 
-    private List<Integer[]> mainParamsList;
-    private List<Integer[]> refOutParamsList;       // список опорных параметров
-    private List<Integer[]> outParamsList;
+    private final List<List <Integer>> mainParamsList;
+    private final List<List <Integer>> refOutParamsList;       // список опорных параметров
+    private final List<List <Integer>> outParamsList;
 
     ParamsBox() {
         mainParamsList = new ArrayList<>();
@@ -15,21 +15,34 @@ public class ParamsBox {
         refOutParamsList = new ArrayList<>();
     }
 
-    public List<Integer[]> mainParamsList() {
+    public List<List <Integer>> mainParamsList() {
         return mainParamsList;
     }
 
-    public List<Integer[]> outParamsList() {
+    public List<List <Integer>> outParamsList() {
         return outParamsList;
     }
 
-    public List<Integer[]> refOutParamsList() {
-        return refOutParamsList;
-    }
+    public List<List <Integer>> refOutParamsList() { return refOutParamsList; }
 
     public void clearParams() {
         mainParamsList.clear();
         outParamsList.clear();
         refOutParamsList.clear();
     }
+
+    public void clearMainParamsList() {
+//        System.out.println("mainParamsList:" + mainParamsList.size());
+        mainParamsList.clear();
+//        System.out.println("mainParamsList:" + mainParamsList.size());
+    }
+
+    public void clearOutParamsList() {
+        outParamsList.clear();
+    }
+
+    public void clearRefOutParamsList() {
+        refOutParamsList.clear();
+    }
+
 }

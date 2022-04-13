@@ -1,4 +1,7 @@
 import java.io.*;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -6,11 +9,9 @@ import java.util.regex.PatternSyntaxException;
 
 public class ReadDraw {
 
-    private MainView mainView;
+    private final MainView mainView;
     private File source_file;
-    private List<Integer[]> mainParamsList;
-
-    private Integer num_ex, hit_1, hit_2, hit_3, hit_4, x, y, v;
+    private final List<List<Integer>> mainParamsList;
 
     ReadDraw(MainView mainView, ParamsBox paramsBox) {
         this.mainView = mainView;
@@ -29,25 +30,31 @@ public class ReadDraw {
         try {
             while ((rd_line = reader_obj.readLine()) != null) {                        // построчный проход текстового файла
                 int flags_pattern = Pattern.CASE_INSENSITIVE;
-                Pattern pattern_rd_line = Pattern.compile("^.*?(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+([-]?\\d+[.,]?\\d*)\\s+([-]?\\d+[.,]?\\d*)\\s+([-]?\\d+[.,]?\\d*).*?$", flags_pattern);
+                Pattern pattern_rd_line = Pattern.compile("^.*?(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+([-]?\\d+[.,]?\\d*)\\s+([-]?\\d+[.,]?\\d*)\\s+([-]?\\d+[.,]?\\d*)\\s+([-]?\\d+[.,]?\\d*).*?$", flags_pattern);
+//                Pattern pattern_rd_line = Pattern.compile("^.*?(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+([-]?\\d+[.,]?\\d*)\\s+([-]?\\d+[.,]?\\d*)\\s+([-]?\\d+[.,]?\\d*).*?$", flags_pattern);
                 Matcher matcher_rd_line = pattern_rd_line.matcher(rd_line);           // инииализация матчинга
-
                 if (matcher_rd_line.find()) {                                         // если в строке найдены совпадения по паттерну
-                    num_ex = Integer.parseInt(matcher_rd_line.group(1));
-                    hit_1 = Integer.parseInt(matcher_rd_line.group(2));
-                    hit_2 = Integer.parseInt(matcher_rd_line.group(3));
-                    hit_3 = Integer.parseInt(matcher_rd_line.group(4));
-                    hit_4 = Integer.parseInt(matcher_rd_line.group(5));
-                    x = (int) (Math.round(Double.parseDouble(matcher_rd_line.group(6))));
-                    y = (int) (Math.round(Double.parseDouble(matcher_rd_line.group(7))));
-                    v = (int) (Math.round(Double.parseDouble(matcher_rd_line.group(8))));
+                    List <Integer> curr_params_list = new ArrayList<>();              // хранилище снятого по паттерну набора параметров
+                    for (int i = 1; i < matcher_rd_line.groupCount() + 1; i++) {
+//                        if (matcher_rd_line.group(i).contains(","))
+                            curr_params_list.add(NumberFormat.getInstance(java.util.Locale.FRANCE).parse(matcher_rd_line.group(i)).intValue());
+//                        else
+//                            System.out.format("%d", Integer.valueOf(matcher_rd_line.group(i)));
+                    }
 
+                    int x = curr_params_list.get(5);
+                    int y = curr_params_list.get(6);
                     mainView.drawPoint(x, y);       // отрисовка найденной точки
 
-                    this.mainParamsList.add(new Integer[]{num_ex, hit_1, hit_2, hit_3, hit_4, x, y, v});
+//                    this.mainParamsList.add(new Integer[]{num_ex, hit_1, hit_2, hit_3, hit_4, x, y, v, amp});
+                    this.mainParamsList.add(curr_params_list);
 
-                    // Вывод инф. в поле TextArea out_field
-                    mainView.toTextOut1(num_ex + " " + hit_1 + " " + hit_2 + " " + hit_3 + " " + hit_4 + " " + x + " " + y + " " + v + "\n");
+                    StringBuilder str_toTextOut = new StringBuilder();
+                    for (Integer s: curr_params_list) {
+                        str_toTextOut.append(s).append(" ");
+                    }
+                    // Вывод инф. в поле out_field1
+                    mainView.toTextOut1(str_toTextOut + "\n");
                 }
             }
             reader_obj.close();
@@ -58,6 +65,8 @@ public class ReadDraw {
             System.err.println("Неправильный шаблон: " + pse.getPattern());
         } catch (IllegalStateException e) {
             System.out.println("No matches for spec pattern!");
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
     }
 
