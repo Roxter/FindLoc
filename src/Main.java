@@ -1,21 +1,27 @@
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.List;
 
 public class Main extends Application {
 
     private Stage primaryStage;
     private Scene scene;
     private MainView mainView;
+    private String[] args;
 
     @Override
     public void start(Stage stage) {
 
 //        Main m = new Main();
+
+//        final Parameters params = getParameters();
+//        final List<String> paramsList = params.getRaw();
 
         this.primaryStage = stage;
 
@@ -34,7 +40,7 @@ public class Main extends Application {
     }
 
     public static void main(String[] args) {
-        launch();
+        launch(args);
     }
 
 }

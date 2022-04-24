@@ -7,6 +7,7 @@ public class SolveDraw {
     private final MainView mainView;
     private File source_file;
     private final List<List <Integer>> mainParamsList;
+    private final List<List <Integer>> postProcList;
     private final List<List <Integer>> refOutParamsList;
     private final List<List <Integer>> outParamsList;
     private Integer range_value;
@@ -19,6 +20,7 @@ public class SolveDraw {
     SolveDraw(MainView mainView, ParamsBox paramsBox) {
         this.mainView = mainView;
         this.mainParamsList = paramsBox.mainParamsList();
+        this.postProcList = paramsBox.postProcList();
         this.refOutParamsList = paramsBox.refOutParamsList();
         this.outParamsList = paramsBox.outParamsList();
     }
@@ -34,7 +36,8 @@ public class SolveDraw {
 
         mainView.clearTextOut();
 
-        solveStream();
+        filterStream();
+        enumerationStream();
         filterRefOutParamsList();
 
 //        int i = 0;
@@ -53,31 +56,39 @@ public class SolveDraw {
 //        writeStream();
     }
 
-    private void solveStream() {
+    private void filterStream() {
+        for (int i = 0; i < mainParamsList.size(); i++) {
+            if ((mainParamsList.get(i).get(8) > minAmp_value) && (mainParamsList.get(i).get(8) < maxAmp_value)) {
+                postProcList.add(new ArrayList<>(mainParamsList.get(i)));
+            }
+        }
+    }
+
+    private void enumerationStream() {
         boolean param_is_first;
         int acc = 0;
         List<Integer> temp_params_list;
 
-        for (int i = 0; i < mainParamsList.size(); i++) {
-            int x1 = mainParamsList.get(i).get(5);
-            int y1 = mainParamsList.get(i).get(6);
-            int v1 = mainParamsList.get(i).get(7);
+        for (int i = 0; i < postProcList.size(); i++) {
+            int x1 = postProcList.get(i).get(5);
+            int y1 = postProcList.get(i).get(6);
+            int v1 = postProcList.get(i).get(7);
             param_is_first = true;
 
-            for (int j = 0; j < mainParamsList.size(); j++) {
+            for (int j = 0; j < postProcList.size(); j++) {
                 if (i != j) {
-                    int x2 = mainParamsList.get(j).get(5);
-                    int y2 = mainParamsList.get(j).get(6);
-                    int v2 = mainParamsList.get(j).get(7);
+                    int x2 = postProcList.get(j).get(5);
+                    int y2 = postProcList.get(j).get(6);
+                    int v2 = postProcList.get(j).get(7);
                     double solved_range_value = Math.sqrt(Math.abs((x2 - x1) * (x2 - x1)) + Math.abs((y2 - y1) * (y2 - y1)));
                     int diff_v = Math.abs(v2 - v1);
                     mainView.toTextOut1(solved_range_value + " " + diff_v + "\n");
 
                     acc = acc + 1;
-                    if (refOutParamsList != null && (solved_range_value < range_value) && (diff_v < speed_value) && (mainParamsList.get(i).get(8) > minAmp_value) && (mainParamsList.get(i).get(8) < maxAmp_value) && (mainParamsList.get(j).get(8) > minAmp_value) && (mainParamsList.get(j).get(8) < maxAmp_value)) {     // сначала ограничиваем по расстоянию/скорости, пишем отфильтрованное в промежуточный refOutParamsList лист
+                    if (refOutParamsList != null && (solved_range_value < range_value) && (diff_v < speed_value) ) {     // сначала ограничиваем по расстоянию/скорости, пишем отфильтрованное в промежуточный refOutParamsList лист
 //                    if (refOutParamsList != null && (solved_range_value < range_value) && (diff_v < speed_value)) {
                         if (param_is_first) {                                                      // если попадает под критерий второй раз, то также отрисовываем предыдущую точку, в ином случае алгоритм сюда не войдёт
-                            temp_params_list = new ArrayList<>(mainParamsList.get(i));               // временный промежуточный объект списка параметров во избежание добавления ссылок на данные в mainParamsList
+                            temp_params_list = new ArrayList<>(postProcList.get(i));               // временный промежуточный объект списка параметров во избежание добавления ссылок на данные в mainParamsList
 //                            System.out.println(temp_params_list == mainParamsList.get(i));                              // отладка
                             refOutParamsList.add(new ArrayList<>(temp_params_list));                 // запись промежуточного объекта temp_params_list в хранилище refOutParamsList
 //                            refOutParamsList.add(mainParamsList.get(i));                         // неверно, т.к. в дальнейшем при изменении объектов refOutParamsList, запись осуществляется также и в mainParamsList (видимо метод .add() записывает ссылки, а не копии объектов)
@@ -87,7 +98,7 @@ public class SolveDraw {
                             param_is_first = false;
                         }
 //                        refOutParamsList.add(new Integer[] {0, mainParamsList.get(j)[0], mainParamsList.get(j)[1], mainParamsList.get(j)[2], mainParamsList.get(j)[3], mainParamsList.get(j)[4], mainParamsList.get(j)[5], mainParamsList.get(j)[6], mainParamsList.get(j)[7], mainParamsList.get(j)[8]});
-                        temp_params_list = new ArrayList<>(mainParamsList.get(j));
+                        temp_params_list = new ArrayList<>(postProcList.get(j));
                         refOutParamsList.add(new ArrayList<>(temp_params_list));
                         refOutParamsList.get(refOutParamsList.size() -  1).add(0, 0);
 //                        System.out.println(refOutParamsList + " " + " i:" + i + " j:" + j);                           // отладка

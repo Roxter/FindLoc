@@ -30,11 +30,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MainView extends VBox {
 
-    private final int axisMax = 700;
+    private int axisMax = 400;
     private final int indent = 40;
-    private final int initRangePoints = 40;
+    private final int initRangePoints = 18;
     private final int initSpeed = 220;
-    private final int initMinAmp = 1;
+    private final int initMinAmp = 47;
     private final int initMaxAmp = 999;
     private final int minPts = 2;
     private final int maxPts = 5;
@@ -84,6 +84,7 @@ public class MainView extends VBox {
 
     public MainView(Stage primaryStage) {
 
+//        axisMax = Integer.parseInt(axisMaxFromMain);
         // Инициализация переменных
         is_started_ReadDraw = new AtomicBoolean(false);
         is_draw_points_on_circles = new AtomicBoolean(true);
