@@ -1,12 +1,7 @@
 import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
-
-import java.io.IOException;
-import java.text.ParseException;
-import java.util.List;
 
 public class Main extends Application {
 
@@ -18,14 +13,15 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) {
 
-//        Main m = new Main();
-
-//        final Parameters params = getParameters();
+//        final Parameters params = getParameters();        // Не получается создать граф. приложение с заданием параметров запуска
 //        final List<String> paramsList = params.getRaw();
 
         this.primaryStage = stage;
 
-        mainView = new MainView(primaryStage);
+        Image ico = new Image("/resources/images/icon.png");
+        primaryStage.getIcons().add(ico);
+
+        mainView = new MainView(primaryStage);      // Создаем наследника VBox во избежание необходимости писать всё в одном классе
         scene = new Scene(mainView);
 
         // Установка параметров объектов

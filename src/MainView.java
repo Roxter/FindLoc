@@ -197,6 +197,7 @@ public class MainView extends VBox {
                             drawAllPoints();
                             drawOutPoints();
 
+                            params.clearAllParams();
                         } else
                             range_field.setText("Enter a valid value!");
                     }
@@ -305,7 +306,7 @@ public class MainView extends VBox {
             outputClip.setHeight(newValue.getHeight());
         });
         this.getChildren().set(0, pane);
-        for(Shape s: shape)     frontcanvas_group.getChildren().add(s);
+        for (Shape s: shape)     frontcanvas_group.getChildren().add(s);
     }
 
     private void drawAllPoints() {
@@ -382,7 +383,7 @@ public class MainView extends VBox {
         draw(point);
     }
 
-    public void drawCircle(Integer x, Integer y, boolean is_amp) {
+    public void drawCircle(Integer x, Integer y, boolean is_amp) {      // Резерв для случая отрисовки кластерных кругов вместо прямоугольников
         if (fieldsIsFill()) {
             Circle circle = new Circle(Integer.parseInt(range_field.getText()));
 

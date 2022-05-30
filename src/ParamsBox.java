@@ -1,5 +1,3 @@
-import com.sun.org.apache.xpath.internal.operations.Bool;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,7 +29,7 @@ public class ParamsBox {
 
     public List<List <Integer>> refOutParamsList() { return refOutParamsList; }
 
-    public void clearParams() {
+    public void clearAllParams() {
         mainParamsList.clear();
         postProcList.clear();
         outParamsList.clear();
