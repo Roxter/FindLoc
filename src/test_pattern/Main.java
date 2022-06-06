@@ -5,7 +5,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Main {
-    private File source_file;
+    private final File source_file;
 
     public static void main(String[] args) throws IOException {
         File f = new File("./in.txt");
@@ -40,7 +40,7 @@ public class Main {
             System.out.print("detected on pattern: ");
             if (matcher_rd_line.find()) {
                 for (int i = 1; ; i++) { try {
-                    System.out.print(matcher_rd_line.group(i) + " ");
+                    System.out.print("group" + i + ": " + matcher_rd_line.group(i) + " ");
                 } catch (IndexOutOfBoundsException e) {
                     break;
                 } }
