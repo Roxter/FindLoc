@@ -385,12 +385,12 @@ public class MainView extends BorderPane {
 //                int color1 = bi.getRGB(96, 488);
 //                System.out.printf("%d %d %d %d", (color1 & 0xff0000) >> 16, (color1 & 0xff00) >> 8, color1 & 0xff, (color1 & 0xff000000) >>> 24);
 
-            int start_w = 93;
-            int start_h = 473;
-            int end_w = 184;
-            int end_h = 474;
-//                int end_w = bi.getWidth();
-//                int end_h = bi.getHeight();
+            int start_w = 0;
+            int start_h = 0;
+//            int end_w = 184;
+//            int end_h = 474;
+            int end_w = bi.getWidth();
+            int end_h = bi.getHeight();
             for (int i = start_h; i < end_h; i++) {
                 for (int j = start_w; j < end_w; j++) {
                     java.awt.Color color_awt = new java.awt.Color(bi.getRGB(j, i));
